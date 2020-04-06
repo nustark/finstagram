@@ -1,0 +1,48 @@
+/* Register.html */
+.register .btn {
+    margin: 5px 0px 5px 0px;
+}
+
+.home .card {
+    margin: auto;
+    margin-top: 20px;
+}
+
+.home .card-body {
+    font-size: .9rem;
+}
+
+.home .card-body .caption {
+    /* font-size: .8rem; */
+    color: grey;
+}
+
+.home .card .card-title {
+    color: grey;
+}
+
+.home .card-header img {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: 10px;
+    margin-bottom: 2px;
+}
+
+.home .card-header span {
+    float: right;
+    color: grey;
+}
+
+.home .col-4 .respond-follow .row {
+    padding-bottom: 5px;
+    vertical-align: middle;
+}
+
+.home .respond-follow .row .col-4 .follower-box {
+    border: 0px;
+    background-color: white;
+}
+
+.upload .btn {
+    margin-top: 30px;
+}

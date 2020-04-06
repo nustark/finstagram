@@ -1,0 +1,41 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}Index{% endblock %}
+
+{% block styles %}
+{{super()}}
+  <link rel="stylesheet" href="{{url_for('.static', filename='css/main.css')}}">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='camera.ico') }}">
+{% endblock %}
+
+{% block navbar %}
+<div class="navbar navbar-fixed-top">
+  <!-- ... -->
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container text-center">
+        <h1>Welcome to Finstagram</h1>
+        <br>
+
+        <div class="card" style="margin: auto; width: 30rem;">
+            <img class="card-img-top" src="../static/img/demo56.jpg" alt="Demo picture here">
+            <!-- <img class="card-img-top" src="https://picsum.photos/300" alt="Demo picture here"> -->
+            <div class="card-body">
+                <h5 class="card-title">Register or Login</h5>
+                <!-- <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6> -->
+                <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                <a href="/register" class="btn btn-outline-primary">Register</a>
+                <a href="/login" class="btn btn-primary">Login</a>
+            </div>
+        </div>
+
+        <br>
+        <!-- <div>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lacus vestibulum sed arcu non odio euismod lacinia at quis. Malesuada fames ac turpis egestas integer eget aliquet nibh praesent. Neque egestas congue quisque egestas diam in arcu. Adipiscing diam donec adipiscing tristique risus nec feugiat in. Mi in nulla posuere sollicitudin aliquam ultrices sagittis orci a. Sed elementum tempus egestas sed sed risus pretium quam vulputate. Sit amet consectetur adipiscing elit ut aliquam purus sit amet. Lacus vel facilisis volutpat est velit egestas dui. Ac odio tempor orci dapibus ultrices in iaculis.
+        </div>
+        <div>
+            Blandit libero volutpat sed cras ornare arcu. Purus ut faucibus pulvinar elementum integer enim. Libero volutpat sed cras ornare arcu dui vivamus arcu felis. Etiam non quam lacus suspendisse faucibus interdum posuere lorem ipsum. Dictum sit amet justo donec enim. Urna et pharetra pharetra massa massa ultricies mi quis hendrerit. Massa tempor nec feugiat nisl. Egestas integer eget aliquet nibh praesent. Dolor sit amet consectetur adipiscing elit ut. Nulla aliquet enim tortor at auctor urna nunc id. Platea dictumst vestibulum rhoncus est. Maecenas accumsan lacus vel facilisis volutpat est.
+        </div> -->
+    </div>
+{% endblock %}

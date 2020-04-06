@@ -1,0 +1,90 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block styles %}
+{{super()}}
+  <link rel="stylesheet" href="{{url_for('.static', filename='css/main.css')}}">
+  <link rel="shortcut icon" href="{{ url_for('static', filename='camera.ico') }}">
+{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="#">Finstagram</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/upload">Upload</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">Logout</a>
+                </li>
+            </ul>
+
+            <!-- <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form> -->
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container home">
+    <div class="row">
+        <div class="col-8">
+            {% for post in posts %}
+            <div class="card" style="width: 36rem;">
+                <div class="card-header">
+                    <img src="../static/img/octocat.png">{{post.poster}}
+                    <span>{{post.postingDate}}</span>
+                </div>
+                <img class="card-img-top" src={{post.filePath}} alt="Card image">
+                <div class="card-body">
+                    <div>{{post.poster}}<span class="caption"> {{post.caption}}</span></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="col-4">
+            <div class="card respond-follow">
+                <div class="card-body">
+                    <h6 class="card-title">Follow Requests</h6>
+                    {% for follow in followData %}
+                        <form action="/followResponse" method="POST">
+                            <div class="row">
+                                <div class="col-4">
+                                    <input class="form-control follower-box" type="text" name="follower" value={{follow.follower}} />
+                                </div>
+                                <div class="col-8">
+                                    <input style="float: right; margin-left: 5px" class="btn btn-outline-primary btn-sm" type="submit" name="acceptDecline" value="Decline" />
+                                    <input style="float: right" class="btn btn-primary btn-sm" type="submit" name="acceptDecline" value="Accept" />
+                                    <!-- <input style="float: right; margin-left: 5px" class="btn btn-outline-primary btn-sm" type="button" name="decline" value="Decline" />
+                                    <input style="float: right" class="btn btn-primary btn-sm" type="button" name="accept" value="Accept" /> -->
+                                </div>
+                            </div>
+                        </form>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="card send-follow">
+                <div class="card-body">
+                    <h6 class="card-title">Send Follow Request</h6>
+                    <form action="/sendFollow" method="POST">
+                        <input class="form-control" type="text" name="sendFollow" placeholder="Followee" required /></br>
+                        <input class="btn btn-primary" type="submit" value=Send />
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
