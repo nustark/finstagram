@@ -3,8 +3,8 @@
 
 {% block styles %}
 {{super()}}
-  <link rel="stylesheet" href="{{url_for('.static', filename='css/main.css')}}">
-  <link rel="shortcut icon" href="{{ url_for('static', filename='camera.ico') }}">
+<link rel="stylesheet" href="{{url_for('.static', filename='css/main.css')}}">
+<link rel="shortcut icon" href="{{ url_for('static', filename='camera.ico') }}">
 {% endblock %}
 
 {% block navbar %}
@@ -44,10 +44,19 @@
             {% for post in posts %}
             <div class="card" style="width: 36rem;">
                 <div class="card-header">
-                    <img src="../static/img/octocat.png">{{post.poster}}
-                    <span>{{post.postingDate}}</span>
+                    <div style="float: left"><img src="../static/img/octocat.png">{{post.poster}}</div>
+                    <!-- <div class="dropdown" data-toggle="dropdown" style="float: right; margin-right: -20px">
+                        <img id="more-icon" src="../static/img/more1.png">
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                          <a data-target="/upload" class="dropdown-item">Manage tags</a>
+                        </div>
+                    </div> -->
+                    <div style="float: right">
+                        <strong><a style="color: grey; text-decoration: none" href="/manageTag/{{post.pid}}">Tags</a></strong>
+                    </div>
+                    <div id="post-info" style="float: right; padding-right: 10px">#{{post.pid}} {{post.postingdate}}</div>
                 </div>
-                <img class="card-img-top" src={{post.filePath}} alt="Card image">
+                <img class="card-img-top" src={{post.filepath}} alt="Card image">
                 <div class="card-body">
                     <div>{{post.poster}}<span class="caption"> {{post.caption}}</span></div>
                 </div>

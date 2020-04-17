@@ -1,0 +1,65 @@
+{% extends "bootstrap/base.html" %}
+{% block title %}Manage Tags{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{url_for('.static', filename='css/main.css')}}">
+<link rel="shortcut icon" href="{{ url_for('static', filename='camera.ico') }}">
+{% endblock %}
+
+{% block navbar %}
+<div class="navbar navbar-fixed-top">
+	<!-- ... -->
+</div>
+{% endblock %}
+
+{% block content %}
+    <div class="container tags">
+		<h1>Tags</h1>
+		<br>
+		<div class="row">
+			<div class="col-8">
+				<div class="card" style="width: 36rem;">
+					<div class="card-header">
+						<div style="float: left"><img src="../static/img/octocat.png">{{photo.poster}}</div>
+						<div id="post-info" style="float: right; padding-right: 10px">#{{photo.pID}} {{photo.postingDate}}</div>
+					</div>
+					<img class="card-img-top" src=../{{photo.filePath}} alt="Card image">
+					<div class="card-body">
+						<div>{{photo.poster}}<span class="caption"> {{photo.caption}}</span></div>
+					</div>
+				</div>
+			</div>
+			<div class="col-4">
+				<div class="card">
+					<div class="card-header">
+						#{{photo.pID}}'s Current Tags
+					</div>
+					<div class="card-body">
+						<!-- <h5 class="card-title">Special title treatment</h5> -->
+						<p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+						<a href="#" class="btn btn-primary">Go somewhere</a>
+					</div>
+				</div>
+				<div class="card" style="margin-top: 15px">
+					<div class="card-header">Pending Tags</div>
+					<div class="card-body">
+						<!-- <h5 class="card-title">Special title treatment</h5> -->
+						<p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+						<a href="#" class="btn btn-primary">Go somewhere</a>
+					</div>
+				</div>
+				<div class="card" style="margin-top: 15px">
+					<div class="card-header">Add Tags</div>
+					<div class="card-body">
+						<!-- <h5 class="card-title">Send a tag</h5> -->
+						<form action="/sendTag" method="POST">
+							<input class="form-control" type="text" name="sendTag" placeholder="User" required /></br>
+							<input class="btn btn-primary" type="submit" value=Send />
+                    	</form>
+					</div>
+				</div>
+			</div>
+		</div>
+    </div>
+{% endblock %}

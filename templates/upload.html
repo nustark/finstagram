@@ -3,13 +3,13 @@
 
 {% block styles %}
 {{super()}}
-  <link rel="stylesheet" href="{{url_for('.static', filename='css/main.css')}}">
-  <link rel="shortcut icon" href="{{ url_for('static', filename='camera.ico') }}">
+<link rel="stylesheet" href="{{url_for('.static', filename='css/main.css')}}">
+<link rel="shortcut icon" href="{{ url_for('static', filename='camera.ico') }}">
 {% endblock %}
 
 {% block navbar %}
 <div class="navbar navbar-fixed-top">
-  <!-- ... -->
+    <!-- ... -->
 </div>
 {% endblock %}
 
@@ -26,6 +26,7 @@
                     <input class="form-control" type="text" name="username" placeholder={{username}} disabled/></br>
                     <input class="form-control" type="text" name="postingDate" placeholder="{{postingDate}}" disabled/></br>
                     <!-- <input class="form-control" type="text" name = "allFollowers" placeholder="allFollowers" required/></br> -->
+                    <div style="font-weight: bold">Share With All Followers?</div>
                     <input class="form-control" type="radio" name="allFollowers" value="True">
                     <label for="True">True</label>
                     <input class="form-control" type="radio" name="allFollowers" value="False">

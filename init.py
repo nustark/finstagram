@@ -10,6 +10,7 @@ import blob
 # === Incomplete ===
 # Password hashing
 # Photo share with
+# Check if session is logged in, else redirect to login
 
 app = Flask(__name__)
 Bootstrap(app)
@@ -93,16 +94,16 @@ def home():
     # cursor.close()
     try:
         with conn.cursor() as cursor:
-            query = "SELECT * FROM Photo WHERE poster = %s ORDER BY postingDate DESC"
-            cursor.execute(query, (user))
+            # query = "SELECT * FROM Photo WHERE poster = %s ORDER BY postingDate DESC"
+            query = "SELECT pid, postingdate, filepath, allfollowers, caption, poster FROM person JOIN follow ON (person.username = follow.follower) JOIN photo ON (follow.followee = photo.poster) WHERE (follow.follower = %s AND follow.followstatus = 1) OR poster = %s ORDER BY postingdate DESC"
+            cursor.execute(query, (user, user))
             posts = cursor.fetchall()
 
         with conn.cursor() as cursor:
-            query = "SELECT * FROM follow WHERE followStatus = 0 AND followee = %s"
+            query = "SELECT * FROM follow WHERE followstatus = 0 AND followee = %s"
             cursor.execute(query, (user))
             followData = cursor.fetchall()
             # print("followDATA:", followData)
-
         return render_template('home.html', username=user, posts=posts, followData=followData)
     except Exception as e:
         return str(e)
@@ -131,7 +132,7 @@ def insertPhoto(username, postingDate, filePath, allFollowers, caption):
     # Inserting corresponding values to database
     try:
         cursor = conn.cursor()
-        query = "INSERT INTO photo (pID, postingDate, filePath, allFollowers, caption, poster) VALUES (%s, %s, %s, %s, %s, %s)"
+        query = "INSERT INTO photo (pid, postingdate, filepath, allfollowers, caption, poster) VALUES (%s, %s, %s, %s, %s, %s)"
         queryTuple = (0, postingDate, filePath, allFollowers, caption, username)
         cursor.execute(query, queryTuple)
         conn.commit()
@@ -155,7 +156,7 @@ def insertSharedWith(pID, groupName):
         # Query to insert into SharedWith
         with conn.cursor() as cursor:
             print("in second with")
-            insertQuery = "INSERT INTO sharedwith (pID, groupName, groupCreator) VALUES (%s, %s, %s)"
+            insertQuery = "INSERT INTO sharedwith (pid, groupname, groupcreator) VALUES (%s, %s, %s)"
             queryTuple = (pID, groupName, groupCreator)
             cursor.execute(insertQuery, queryTuple)
             conn.commit()
@@ -204,7 +205,6 @@ def uploadFile():
                 session.pop('postingDate')
                 # if (friendGroup != "default"):
                 #     insertSharedWith(pID, friendGroup)
-
                 return redirect(url_for('home'))
         except Exception as e:
             return str(e)
@@ -217,7 +217,7 @@ def sendFollow():
 
         if (followee != user):
             with conn.cursor() as cursor:
-                query = "INSERT INTO follow (follower, followee, followStatus) VALUES (%s, %s, %s)"
+                query = "INSERT INTO follow (follower, followee, followstatus) VALUES (%s, %s, %s)"
                 cursor.execute(query, (user, followee, 0))
                 conn.commit()
         return redirect(url_for('home'))
@@ -249,11 +249,34 @@ def followResponse():
             follower = request.form['follower']
 
             with conn.cursor() as cursor:
-                query = "DELETE FROM follow WHERE follower = %s AND followee = %s AND followStatus = 0"
+                query = "DELETE FROM follow WHERE follower = %s AND followee = %s AND followstatus = 0"
                 cursor.execute(query, (follower, user))
                 conn.commit()
-
         return redirect(url_for('home'))
+    except Exception as e:
+        return str(e)
+
+@app.route('/sendTag', methods=['GET', 'POST'])
+def sendTag():
+    user = session['username']
+    tagged = request.form['sendTag']
+    print("TAGGED IS", tagged)
+    return redirect(url_for('home'))
+
+
+@app.route('/manageTag/<string:pID>', methods=['GET', 'POST'])
+def manageTag(pID):
+    user = session['username']
+    try:
+        with conn.cursor() as cursor:
+            query = "SELECT * FROM photo WHERE pid = %s AND poster = %s"
+            cursor.execute(query, (pID, user))
+            photo = cursor.fetchone()
+            print("\n", photo, "\n")
+
+        # with conn.cursor() as cursor:
+        #     query = ""
+        return render_template('tags.html', photo=photo)
     except Exception as e:
         return str(e)
 
