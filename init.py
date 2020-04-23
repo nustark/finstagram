@@ -94,9 +94,9 @@ def home():
     # cursor.close()
     try:
         with conn.cursor() as cursor:
-            # query = "SELECT * FROM Photo WHERE poster = %s ORDER BY postingDate DESC"
-            query = "SELECT pid, postingdate, filepath, allfollowers, caption, poster FROM person JOIN follow ON (person.username = follow.follower) JOIN photo ON (follow.followee = photo.poster) WHERE (follow.follower = %s AND follow.followstatus = 1) OR poster = %s ORDER BY postingdate DESC"
-            cursor.execute(query, (user, user))
+            # query = "SELECT DISTINCT pid, postingdate, filepath, allfollowers, caption, poster FROM person JOIN follow ON (person.username = follow.follower) JOIN photo ON (follow.followee = photo.poster) WHERE (follow.follower = %s AND follow.followstatus = 1) OR poster = %s ORDER BY postingdate DESC"
+            query = "SELECT pid, postingdate, filepath, allfollowers, caption, poster FROM person JOIN follow ON (person.username = follow.follower) JOIN photo ON (follow.followee = photo.poster) WHERE follow.follower = %s AND followstatus = 1 AND allfollowers = 1 UNION SELECT pid, postingdate, filepath, allfollowers, caption, poster FROM photo WHERE poster = %s UNION SELECT pid, postingdate, filepath, allfollowers, caption, poster FROM person JOIN belongto ON (person.username = belongto.username) JOIN sharedwith ON (belongto.groupname = sharedwith.groupname) NATURAL JOIN photo WHERE person.username = %s ORDER BY postingdate DESC";
+            cursor.execute(query, (user, user, user))
             posts = cursor.fetchall()
 
         with conn.cursor() as cursor:
@@ -150,8 +150,8 @@ def insertSharedWith(pID, groupName):
             selectQuery = "SELECT groupcreator FROM belongto WHERE username = %s AND groupname = %s"
             cursor.execute(selectQuery, (user, groupName))
             data = cursor.fetchone()
-            groupCreator = data['groupCreator']
-            print("GROUP CREATOR: ", groupCreator)
+            print(data['groupcreator'])
+            groupCreator = data['groupcreator']
 
         # Query to insert into SharedWith
         with conn.cursor() as cursor:
@@ -160,7 +160,10 @@ def insertSharedWith(pID, groupName):
             queryTuple = (pID, groupName, groupCreator)
             cursor.execute(insertQuery, queryTuple)
             conn.commit()
-        print("end of INSERTWITH, groupcreator is ", groupCreator)
+            print("end of INSERTWITH, groupcreator is ", groupCreator)
+        # query1 = "SELECT groupcreator FROM belongto WHERE username = %s AND groupname = %s"
+        # query2 = "INSERT INTO sharedwith (pid, groupname, groupcreator) VALUES (%s, %s, %s)"
+        # queries = [query1, query2]
     except Exception as e:
         return str(e)
 
@@ -178,6 +181,7 @@ def uploadFile():
             caption = request.form['caption']
             filename = ''
             friendGroup = request.form.get('friendGroup')
+            print("FRIEND GROUP:", friendGroup)
 
             # Query for next pID
             with conn.cursor() as cursor:
@@ -204,7 +208,7 @@ def uploadFile():
 
                 session.pop('postingDate')
                 # if (friendGroup != "default"):
-                #     insertSharedWith(pID, friendGroup)
+                insertSharedWith(pID, friendGroup)
                 return redirect(url_for('home'))
         except Exception as e:
             return str(e)
@@ -260,25 +264,69 @@ def followResponse():
 def sendTag():
     user = session['username']
     tagged = request.form['sendTag']
+    pID = session['pID']
     print("TAGGED IS", tagged)
-    return redirect(url_for('home'))
+    print("CURRENT SESSION ", session)
+    
+    # User is tagging him/herself
+    if (user == tagged):
+        try:
+            with conn.cursor() as cursor:
+                query = "INSERT INTO tag (pid, username, tagstatus) VALUES (%s, %s, %s)"
+                cursor.execute(query, (pID, user, 1))
+                conn.commit()
+                session.pop('pID')
+                print("AFTER INSERT ",session)
+                
+                return redirect(url_for('home'))
+        except Exception as e:
+            return str(e)
+    # User is tagging someone else
+    else:
+        try:
+            # Check if tagged user can see photo
+            with conn.cursor() as cursor:
+                query = "INSERT INTO tag (pid, username, tagstatus) VALUES (%s, %s, %s)"
+                cursor.execute(query, (pID, tagged, 0))
+                conn.commit()
+                session.pop('pID')
+                print("AFTER INSERT ",session)
+
+                return redirect(url_for('home'))
+        except Exception as e:
+            return str(e)
 
 
-@app.route('/manageTag/<string:pID>', methods=['GET', 'POST'])
-def manageTag(pID):
+@app.route('/manageInfo/<string:pID>', methods=['GET', 'POST'])
+def manageInfo(pID):
     user = session['username']
     try:
+        # Get current photo information
         with conn.cursor() as cursor:
-            query = "SELECT * FROM photo WHERE pid = %s AND poster = %s"
-            cursor.execute(query, (pID, user))
+            query = "SELECT * FROM photo WHERE pid = %s"
+            cursor.execute(query, (pID))
             photo = cursor.fetchone()
-            print("\n", photo, "\n")
+            session['pID'] = pID
+            # print("\n", photo, "\n")
 
-        # with conn.cursor() as cursor:
-        #     query = ""
-        return render_template('tags.html', photo=photo)
+        # Get current tags for photo
+        with conn.cursor() as cursor:
+            pID = session['pID']
+            query = "SELECT * FROM tag WHERE pid = %s AND tagstatus = 1;"
+            cursor.execute(query, (pID))
+            tags = cursor.fetchall()
+
+        return render_template('info.html', photo=photo, tags=tags)
     except Exception as e:
         return str(e)
+
+@app.route('/reactTo', methods=['GET', 'POST'])
+def reactTo():
+    user = session['username']
+    emoji = request.form['emoji']
+    comment = request.form['comment']
+    print(" emoji ", emoji, " and commment is ", comment)
+    return redirect(url_for('home'))
 
 app.secret_key = 'Some key that you will never guess'
 

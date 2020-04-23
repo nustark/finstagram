@@ -52,7 +52,7 @@
                         </div>
                     </div> -->
                     <div style="float: right">
-                        <strong><a style="color: grey; text-decoration: none" href="/manageTag/{{post.pid}}">Tags</a></strong>
+                        <strong><a style="color: grey; text-decoration: none" href="/manageInfo/{{post.pid}}">More Info</a></strong>
                     </div>
                     <div id="post-info" style="float: right; padding-right: 10px">#{{post.pid}} {{post.postingdate}}</div>
                 </div>
@@ -64,6 +64,7 @@
             {% endfor %}
         </div>
         <div class="col-4">
+            <div class="text-center" style="padding-top: 20px">{{username}}</div>
             <div class="card respond-follow">
                 <div class="card-body">
                     <h6 class="card-title">Follow Requests</h6>
