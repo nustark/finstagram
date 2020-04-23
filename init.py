@@ -95,7 +95,7 @@ def home():
     try:
         with conn.cursor() as cursor:
             # query = "SELECT DISTINCT pid, postingdate, filepath, allfollowers, caption, poster FROM person JOIN follow ON (person.username = follow.follower) JOIN photo ON (follow.followee = photo.poster) WHERE (follow.follower = %s AND follow.followstatus = 1) OR poster = %s ORDER BY postingdate DESC"
-            query = "SELECT pid, postingdate, filepath, allfollowers, caption, poster FROM person JOIN follow ON (person.username = follow.follower) JOIN photo ON (follow.followee = photo.poster) WHERE follow.follower = %s AND followstatus = 1 AND allfollowers = 1 UNION SELECT pid, postingdate, filepath, allfollowers, caption, poster FROM photo WHERE poster = %s UNION SELECT pid, postingdate, filepath, allfollowers, caption, poster FROM person JOIN belongto ON (person.username = belongto.username) JOIN sharedwith ON (belongto.groupname = sharedwith.groupname) NATURAL JOIN photo WHERE person.username = %s ORDER BY postingdate DESC";
+            query = "SELECT pid, postingdate, filepath, allfollowers, caption, poster FROM person JOIN follow ON (person.username = follow.follower) JOIN photo ON (follow.followee = photo.poster) WHERE follow.follower = %s AND followstatus = 1 AND allfollowers = 1 UNION SELECT pid, postingdate, filepath, allfollowers, caption, poster FROM photo WHERE poster = %s UNION SELECT pid, postingdate, filepath, allfollowers, caption, poster FROM person JOIN belongto ON (person.username = belongto.username) JOIN sharedwith ON (belongto.groupname = sharedwith.groupname) NATURAL JOIN photo WHERE person.username = %s ORDER BY postingdate DESC"
             cursor.execute(query, (user, user, user))
             posts = cursor.fetchall()
 
@@ -289,7 +289,7 @@ def sendTag():
                 query = "INSERT INTO tag (pid, username, tagstatus) VALUES (%s, %s, %s)"
                 cursor.execute(query, (pID, tagged, 0))
                 conn.commit()
-                session.pop('pID')
+                # session.pop('pID')
                 print("AFTER INSERT ",session)
 
                 return redirect(url_for('home'))
@@ -312,21 +312,39 @@ def manageInfo(pID):
         # Get current tags for photo
         with conn.cursor() as cursor:
             pID = session['pID']
-            query = "SELECT * FROM tag WHERE pid = %s AND tagstatus = 1;"
+            query = "SELECT * FROM tag WHERE pid = %s AND tagstatus = 1"
             cursor.execute(query, (pID))
             tags = cursor.fetchall()
 
-        return render_template('info.html', photo=photo, tags=tags)
+        with conn.cursor() as cursor:
+            pID = session['pID']
+            query = "SELECT * FROM reactto WHERE pid = %s ORDER BY reactiontime ASC"
+            cursor.execute(query, (pID))
+            comments = cursor.fetchall()
+
+        return render_template('info.html', photo=photo, tags=tags, comments=comments)
     except Exception as e:
         return str(e)
 
 @app.route('/reactTo', methods=['GET', 'POST'])
 def reactTo():
     user = session['username']
+    pID = session['pID']
     emoji = request.form['emoji']
     comment = request.form['comment']
+    reactionTime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
     print(" emoji ", emoji, " and commment is ", comment)
-    return redirect(url_for('home'))
+    print(session)
+
+    try:
+        with conn.cursor() as cursor:
+            query = "INSERT INTO reactto (username, pid, reactiontime, comment, emoji) VALUES (%s, %s, %s, %s, %s)"
+            cursor.execute(query, (user, pID, reactionTime, comment, emoji))
+            conn.commit()
+        return redirect(url_for('manageInfo', pID=pID))
+    except Exception as e:
+        return str(e)
 
 app.secret_key = 'Some key that you will never guess'
 

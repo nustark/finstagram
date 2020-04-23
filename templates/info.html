@@ -19,7 +19,7 @@
 		<br>
 		<div class="row">
 			<div class="col-8">
-				<div class="card" style="width: 36rem;">
+				<div class="card" style="width: 36rem">
 					<div class="card-header">
 						<div style="float: left"><img src="../static/img/octocat.png">{{photo.poster}}</div>
 						<div id="post-info" style="float: right; padding-right: 10px">#{{photo.pID}} {{photo.postingDate}}</div>
@@ -44,6 +44,14 @@
 								</div>
 							</div>
 						</form>
+					</div>
+				</div>
+				<div class="card" style="width: 36rem; margin-top: 10px; margin-bottom: 10px">
+					<div class="card-header">Reactions</div>
+					<div class="card-body">
+						{% for comment in comments %}
+						<div>{{comment.username}} <span style="color: blue">{{comment.emoji}}</span> <span >{{comment.comment}}</span></div>
+						{% endfor %}
 					</div>
 				</div>
 			</div>
