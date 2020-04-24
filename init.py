@@ -260,14 +260,18 @@ def followResponse():
     except Exception as e:
         return str(e)
 
+@app.route('/tagError/<string:pID>', methods=['GET', 'POST'])
+def tagError(pID):
+    return render_template('tagError.html', pID=pID)
+
 @app.route('/sendTag', methods=['GET', 'POST'])
 def sendTag():
     user = session['username']
     tagged = request.form['sendTag']
     pID = session['pID']
     error = None
-    print("TAGGED IS", tagged)
-    print("CURRENT SESSION ", session)
+    # print("TAGGED IS", tagged)
+    # print("CURRENT SESSION ", session)
     
     # User is tagging him/herself
     if (user == tagged):
@@ -290,8 +294,10 @@ def sendTag():
             # Check if tagged user can see photo
             with conn.cursor() as cursor:
                 query = "SELECT pid, postingdate, filepath, allfollowers, caption, poster FROM person JOIN follow ON (person.username = follow.follower) JOIN photo ON (follow.followee = photo.poster) WHERE follow.follower = %s AND followstatus = 1 AND allfollowers = 1 AND pID = %s UNION SELECT pid, postingdate, filepath, allfollowers, caption, poster FROM person JOIN belongto ON (person.username = belongto.username) JOIN sharedwith ON (belongto.groupname = sharedwith.groupname) NATURAL JOIN photo WHERE person.username = %s AND pID = %s"
-                cursor.execute(query, (user, pID, user, pID))
+                print("pID and user are:", pID, user)
+                cursor.execute(query, (tagged, pID, tagged, pID))
                 data = cursor.fetchone()
+                print("DATA FROM CHECK IS: ", data, "\n")
                 if (data):
                     with conn.cursor() as cursor:
                         query = "INSERT INTO tag (pid, username, tagstatus) VALUES (%s, %s, %s)"
@@ -302,8 +308,10 @@ def sendTag():
                     return redirect(url_for('manageInfo', pID=pID))
                 # Tagged user cannot see photo
                 else:
+                    print("IN ERROR NOW")
                     error = "Error: photo is not visible to user and cannot be tagged."
-                    return redirect(url_for('manageInfo', pID=pID, error=error))
+                    return redirect(url_for('tagError', pID=pID))
+                    # return redirect(url_for('manageInfo', pID=pID))
         except Exception as e:
             return str(e)
 
@@ -366,7 +374,7 @@ def manageInfo(pID):
             query = "SELECT * FROM reactto WHERE pid = %s ORDER BY reactiontime ASC"
             cursor.execute(query, (pID))
             comments = cursor.fetchall()
-            print(comments)
+            # print(comments)
 
         return render_template('info.html', photo=photo, currTags=currTags, pendTagMssg=pendTagMssg, comments=comments)
     except Exception as e:
@@ -380,8 +388,8 @@ def reactTo():
     comment = request.form['comment']
     reactionTime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    print(" emoji ", emoji, " and commment is ", comment)
-    print(session)
+    # print(" emoji ", emoji, " and commment is ", comment)
+    # print(session)
 
     try:
         with conn.cursor() as cursor:

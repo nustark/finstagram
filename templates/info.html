@@ -8,9 +8,33 @@
 {% endblock %}
 
 {% block navbar %}
-<div class="navbar navbar-fixed-top">
-	<!-- ... -->
-</div>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+        <a class="navbar-brand" href="#">Finstagram</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/home">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/upload">Upload</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">Logout</a>
+                </li>
+            </ul>
+
+            <!-- <form class="form-inline my-2 my-lg-0">
+            <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form> -->
+        </div>
+    </div>
+</nav>
 {% endblock %}
 
 {% block content %}
@@ -86,11 +110,11 @@
 						<!-- <h5 class="card-title">Send a tag</h5> -->
 						<form action="/sendTag" method="POST">
 							<input class="form-control" type="text" name="sendTag" placeholder="User" required /></br>
-							{% if (error) %}
+							<input class="btn btn-primary" type="submit" value=Send />
+						</form>
+						{% if (error == "Error: photo is not visible to user and cannot be tagged.") %}
 								{{error}}
 							{% endif %}
-							<input class="btn btn-primary" type="submit" value=Send />
-                    	</form>
 					</div>
 				</div>
 			</div>

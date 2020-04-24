@@ -1,0 +1,9 @@
+{% extends "bootstrap/base.html" %}
+{% block content %}
+<div>
+    <p>User cannot see photo with pID {{pID}}, use browser's back button or click "Back" to return to last page.</p>
+</div>
+<form action="/manageInfo/{{pID}}">
+    <input class="btn btn-sm btn-primary" style="margin-left: 5px" type="submit" value="Back">
+</form>
+{% endblock %}
