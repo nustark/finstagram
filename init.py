@@ -8,9 +8,6 @@ import pymysql.cursors
 import blob
 import hashlib
 
-# === Incomplete ===
-# Password hashing
-
 app = Flask(__name__)
 SALT = 'cs3083@universityOfZoom'
 Bootstrap(app)
@@ -146,7 +143,6 @@ def insertPhoto(username, postingDate, filePath, allFollowers, caption):
 
 def insertSharedWith(pID, groupName):
     try:
-        print("in INSERTSHAREDWITH")
         # Query for groupCreator
         user = session['username']
         with conn.cursor() as cursor:
