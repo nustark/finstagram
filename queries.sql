@@ -98,15 +98,15 @@ ORDER BY postingdate DESC;
 -- most recent correct query w/ friendgroup shared
 SELECT pid, postingdate, filepath, allfollowers, caption, poster
 FROM person JOIN follow ON (person.username = follow.follower) JOIN photo ON (follow.followee = photo.poster)
-WHERE follow.follower = 'jnd' AND followstatus = 1 AND allfollowers = 1
+WHERE follow.follower = 'geohot' AND followstatus = 1 AND allfollowers = 1
 UNION
 SELECT pid, postingdate, filepath, allfollowers, caption, poster
 FROM photo
-WHERE poster = 'jnd'
+WHERE poster = 'geohot'
 UNION
 SELECT pid, postingdate, filepath, allfollowers, caption, poster
 FROM person JOIN belongto ON (person.username = belongto.username) JOIN sharedwith ON (belongto.groupname = sharedwith.groupname) NATURAL JOIN photo 
-WHERE person.username = 'jnd'
+WHERE person.username = 'geohot'
 ORDER BY postingdate DESC;
 
 -- photos sharedwith friendgroups user belongs in
@@ -114,11 +114,27 @@ SELECT pid, postingdate, filepath, allfollowers, caption, poster
 FROM person JOIN belongto ON (person.username = belongto.username) JOIN sharedwith ON (belongto.groupname = sharedwith.groupname) NATURAL JOIN photo 
 WHERE person.username = 'jnd';
     
+SELECT * FROM photo JOIN person ON (photo.poster = person.username) WHERE pid = 34;
+SELECT * FROM tag JOIN person ON (tag.username = person.username) WHERE tag.pid = 34 AND tagstatus = 1;
+SELECT * FROM tag WHERE pid = 34 AND username = 'thrmn' AND tagstatus = 0;
+
+-- see if given user can see a given photo, change follow.followerS and pIDs
+SELECT pid, postingdate, filepath, allfollowers, caption, poster
+FROM person JOIN follow ON (person.username = follow.follower) JOIN photo ON (follow.followee = photo.poster)
+WHERE follow.follower = 'jhnsmth' AND followstatus = 1 AND allfollowers = 1 AND pID = 41
+UNION
+SELECT pid, postingdate, filepath, allfollowers, caption, poster
+FROM person JOIN belongto ON (person.username = belongto.username) JOIN sharedwith ON (belongto.groupname = sharedwith.groupname) NATURAL JOIN photo 
+WHERE person.username = 'jhnsmth' AND pID = 41
+ORDER BY postingdate DESC;
+
+select * from photo where pid = 41;
+
 select * from person;
 select * from photo order by postingdate desc;
 select * from friendgroup;
 select * from belongto;
 select * from sharedwith;
-
+select * from reactto order by reactiontime asc;
 select * from follow;
 select * from tag;

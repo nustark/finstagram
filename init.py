@@ -265,6 +265,7 @@ def sendTag():
     user = session['username']
     tagged = request.form['sendTag']
     pID = session['pID']
+    error = None
     print("TAGGED IS", tagged)
     print("CURRENT SESSION ", session)
     
@@ -284,15 +285,25 @@ def sendTag():
     # User is tagging someone else
     else:
         try:
+            # 4/23 10:00pm fix tagging someone that does not have access to the photo
+
             # Check if tagged user can see photo
             with conn.cursor() as cursor:
-                query = "INSERT INTO tag (pid, username, tagstatus) VALUES (%s, %s, %s)"
-                cursor.execute(query, (pID, tagged, 0))
-                conn.commit()
-                # session.pop('pID')
-                print("AFTER INSERT ",session)
-
-            return redirect(url_for('manageInfo', pID=pID))
+                query = "SELECT pid, postingdate, filepath, allfollowers, caption, poster FROM person JOIN follow ON (person.username = follow.follower) JOIN photo ON (follow.followee = photo.poster) WHERE follow.follower = %s AND followstatus = 1 AND allfollowers = 1 AND pID = %s UNION SELECT pid, postingdate, filepath, allfollowers, caption, poster FROM person JOIN belongto ON (person.username = belongto.username) JOIN sharedwith ON (belongto.groupname = sharedwith.groupname) NATURAL JOIN photo WHERE person.username = %s AND pID = %s"
+                cursor.execute(query, (user, pID, user, pID))
+                data = cursor.fetchone()
+                if (data):
+                    with conn.cursor() as cursor:
+                        query = "INSERT INTO tag (pid, username, tagstatus) VALUES (%s, %s, %s)"
+                        cursor.execute(query, (pID, tagged, 0))
+                        conn.commit()
+                        # session.pop('pID')
+                        print("AFTER INSERT ",session)
+                    return redirect(url_for('manageInfo', pID=pID))
+                # Tagged user cannot see photo
+                else:
+                    error = "Error: photo is not visible to user and cannot be tagged."
+                    return redirect(url_for('manageInfo', pID=pID, error=error))
         except Exception as e:
             return str(e)
 

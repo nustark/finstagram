@@ -86,6 +86,9 @@
 						<!-- <h5 class="card-title">Send a tag</h5> -->
 						<form action="/sendTag" method="POST">
 							<input class="form-control" type="text" name="sendTag" placeholder="User" required /></br>
+							{% if (error) %}
+								{{error}}
+							{% endif %}
 							<input class="btn btn-primary" type="submit" value=Send />
                     	</form>
 					</div>
