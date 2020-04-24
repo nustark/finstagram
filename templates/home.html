@@ -94,6 +94,19 @@
                     </form>
                 </div>
             </div>
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Create Friend Group</h6>
+                    <form action="/createFriendGroup" method="POST">
+                        <input class="form-control" type="text" name="groupName" placeholder="New Group" required /></br>
+                        <input class="form-control" type="text" name="groupDescription" placeholder="Group Description" required /></br>
+                        <input class="btn btn-primary" type="submit" value=Send />
+                        {% if (error) %}
+                            {{error}}
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>

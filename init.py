@@ -6,13 +6,13 @@ import os
 import datetime
 import pymysql.cursors
 import blob
+import hashlib
 
 # === Incomplete ===
 # Password hashing
-# Photo share with
-# Check if session is logged in, else redirect to login
 
 app = Flask(__name__)
+SALT = 'cs3083@universityOfZoom'
 Bootstrap(app)
 
 conn = pymysql.connect(
@@ -42,11 +42,13 @@ def register():
 @app.route('/loginAuth', methods=['GET', 'POST'])
 def loginAuth():
     username = request.form['username']
-    password = request.form['password']
+    # password = request.form['password']
+    password = request.form['password'] + SALT
+    hashedPassword = hashlib.sha256(password.encode('utf-8')).hexdigest()
 
     cursor = conn.cursor()
     query = "SELECT * FROM person WHERE username = %s and password = %s"
-    cursor.execute(query, (username, password))
+    cursor.execute(query, (username, hashedPassword))
     data = cursor.fetchone()
     cursor.close()
     error = None
@@ -60,7 +62,9 @@ def loginAuth():
 @app.route('/registerAuth', methods=['GET', 'POST'])
 def registerAuth():
     username = request.form['username']
-    password = request.form['password']
+    password = request.form['password'] + SALT
+    hashedPassword = hashlib.sha256(password.encode('utf-8')).hexdigest()
+
     firstname = request.form['firstname']
     lastname = request.form['lastname']
     email = request.form['email']
@@ -79,7 +83,7 @@ def registerAuth():
         return render_template('register.html', error = error)
     else:
         insertQuery = "INSERT INTO person VALUES(%s, %s, %s, %s, %s)"
-        cursor.execute(insertQuery, (username, password, firstname, lastname, email))
+        cursor.execute(insertQuery, (username, hashedPassword, firstname, lastname, email))
         conn.commit()
         cursor.close()
         return render_template('index.html')
@@ -399,6 +403,34 @@ def reactTo():
         return redirect(url_for('manageInfo', pID=pID))
     except Exception as e:
         return str(e)
+
+@app.route('/groupError/<string:groupName>', methods=['GET', 'POST'])
+def groupError(groupName):
+    return render_template('groupError.html', groupName=groupName)
+
+@app.route('/createFriendGroup', methods=['GET', 'POST'])
+def createFriendGroup():
+    user = session['username']
+    groupName = request.form['groupName'] 
+    groupDescription= request.form['groupDescription'] 
+    error = None
+
+    try:
+        with conn.cursor() as cursor:
+            query = "INSERT INTO friendgroup (groupname, groupcreator, description) VALUES (%s, %s, %s)"
+            cursor.execute(query, (groupName, user, groupDescription))
+            conn.commit()
+        
+        with conn.cursor() as cursor:
+            query = "INSERT INTO belongto (username, groupname, groupcreator) VALUES (%s, %s ,%s)"
+            cursor.execute(query, (user, groupName, user))
+            conn.commit()
+            
+            return redirect(url_for('home'))
+    except Exception as e:
+        error = str(e)
+        # return str(e)
+        return redirect(url_for('groupError', groupName=groupName))
 
 app.secret_key = 'Some key that you will never guess'
 
