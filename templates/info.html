@@ -21,7 +21,7 @@
 			<div class="col-8">
 				<div class="card" style="width: 36rem">
 					<div class="card-header">
-						<div style="float: left"><img src="../static/img/octocat.png">{{photo.poster}}</div>
+						<div style="float: left"><img src="../static/img/octocat.png">{{photo.poster}} <span style="font-size: 1 rem; color: grey">({{photo.firstName}} {{photo.lastName}})</span></div>
 						<div id="post-info" style="float: right; padding-right: 10px">#{{photo.pID}} {{photo.postingDate}}</div>
 					</div>
 					<img class="card-img-top" src=../{{photo.filePath}} alt="Card image">
@@ -61,17 +61,23 @@
 						#{{photo.pID}}'s Current Tags
 					</div>
 					<div class="card-body">
-						{% for tag in tags %}
-						<div>{{tag.username}}</div>
+						{% for tag in currTags %}
+						<div>{{tag.username}} <span style="color: grey">({{tag.firstName}} {{tag.lastName}})</span></div>
 						{% endfor %}
 					</div>
 				</div>
 				<div class="card" style="margin-top: 15px">
-					<div class="card-header">Pending Tags</div>
+					<div class="card-header">Pending Tags for You</div>
 					<div class="card-body">
-						<!-- <h5 class="card-title">Special title treatment</h5> -->
-						<p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-						<a href="#" class="btn btn-primary">Go somewhere</a>
+						{{pendTagMssg}}
+						{% if (pendTagMssg == "You have been tagged for this photo.") %}
+							<form action="/tagResponse" style="padding-top: 10px" method="POST">
+								<input style="float: left; margin-right: 5px" class="btn btn-primary btn-sm" type="submit" name="acceptDecline" value="Accept" />
+								<input style="float: left" class="btn btn-outline-primary btn-sm" type="submit" name="acceptDecline" value="Decline" />
+								<!-- <input style="float: right; margin-left: 5px" class="btn btn-outline-primary btn-sm" type="button" name="decline" value="Decline" />
+								<input style="float: right" class="btn btn-primary btn-sm" type="button" name="accept" value="Accept" /> -->
+							</form>
+						{% endif %}
 					</div>
 				</div>
 				<div class="card" style="margin-top: 15px">

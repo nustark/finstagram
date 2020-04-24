@@ -278,7 +278,7 @@ def sendTag():
                 session.pop('pID')
                 print("AFTER INSERT ",session)
                 
-                return redirect(url_for('home'))
+            return redirect(url_for('manageInfo', pID=pID))
         except Exception as e:
             return str(e)
     # User is tagging someone else
@@ -292,10 +292,30 @@ def sendTag():
                 # session.pop('pID')
                 print("AFTER INSERT ",session)
 
-                return redirect(url_for('home'))
+            return redirect(url_for('manageInfo', pID=pID))
         except Exception as e:
             return str(e)
 
+@app.route('/tagResponse', methods=['GET', 'POST'])
+def tagResponse():
+    try:
+        if (request.form['acceptDecline'] == "Accept"):
+            with conn.cursor() as cursor:
+                user = session['username']
+                pID = session['pID']
+                query = "UPDATE tag SET tagstatus = 1 WHERE username = %s AND pid = %s"
+                cursor.execute(query, (user, pID))
+                conn.commit()
+        elif (request.form['acceptDecline'] == "Decline"):
+            with conn.cursor() as cursor:
+                user = session['username']
+                pID = session['pID']
+                query = "DELETE FROM tag WHERE pid = %s AND username = %s AND tagStatus = 0"
+                cursor.execute(query, (pID, user))
+                conn.commit()
+        return redirect(url_for('manageInfo', pID=pID))
+    except Exception as e:
+        return str(e)
 
 @app.route('/manageInfo/<string:pID>', methods=['GET', 'POST'])
 def manageInfo(pID):
@@ -303,7 +323,7 @@ def manageInfo(pID):
     try:
         # Get current photo information
         with conn.cursor() as cursor:
-            query = "SELECT * FROM photo WHERE pid = %s"
+            query = "SELECT * FROM photo JOIN person ON (photo.poster = person.username) WHERE pid = %s"
             cursor.execute(query, (pID))
             photo = cursor.fetchone()
             session['pID'] = pID
@@ -312,17 +332,32 @@ def manageInfo(pID):
         # Get current tags for photo
         with conn.cursor() as cursor:
             pID = session['pID']
-            query = "SELECT * FROM tag WHERE pid = %s AND tagstatus = 1"
+            # query = "SELECT * FROM tag WHERE pid = %s AND tagstatus = 1"
+            query = "SELECT * FROM tag JOIN person ON (tag.username = person.username) WHERE tag.pid = %s AND tagstatus = 1"
             cursor.execute(query, (pID))
-            tags = cursor.fetchall()
+            currTags = cursor.fetchall()
 
+        #Get pending tags for photo
+        with conn.cursor() as cursor:
+            pID = session['pID']
+            pendTagMssg = None
+            query = "SELECT * FROM tag WHERE pid = %s AND username = %s AND tagstatus = 0"
+            cursor.execute(query, (pID, user))
+            pendTag = cursor.fetchone()
+            if (pendTag):
+                pendTagMssg = "You have been tagged for this photo."
+            else:
+                pendTagMssg = "No pending tag."
+
+        # Get photo reactions
         with conn.cursor() as cursor:
             pID = session['pID']
             query = "SELECT * FROM reactto WHERE pid = %s ORDER BY reactiontime ASC"
             cursor.execute(query, (pID))
             comments = cursor.fetchall()
+            print(comments)
 
-        return render_template('info.html', photo=photo, tags=tags, comments=comments)
+        return render_template('info.html', photo=photo, currTags=currTags, pendTagMssg=pendTagMssg, comments=comments)
     except Exception as e:
         return str(e)
 
