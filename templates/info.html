@@ -48,7 +48,8 @@
 						<div style="float: left"><img src="../static/img/octocat.png">{{photo.poster}} <span style="font-size: 1 rem; color: grey">({{photo.firstName}} {{photo.lastName}})</span></div>
 						<div id="post-info" style="float: right; padding-right: 10px">#{{photo.pID}} {{photo.postingDate}}</div>
 					</div>
-					<img class="card-img-top" src=../{{photo.filePath}} alt="Card image">
+					<!-- <img class="card-img-top" src=../{{photo.filePath}} alt="Card image"> -->
+					<img class="card-img-top" src="../static/images/{{photo.filePath}}" alt="Card image">
 					<div class="card-body">
 						<div>{{photo.poster}}<span class="caption"> {{photo.caption}}</span></div>
 						<form style="padding-top: 10px" action="/reactTo" method="POST">

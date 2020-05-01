@@ -5,11 +5,11 @@ from werkzeug.utils import secure_filename
 import os
 import datetime
 import pymysql.cursors
-import blob
 import hashlib
 
 app = Flask(__name__)
 SALT = 'cs3083@universityOfZoom'
+# IMAGES_DIR = os.path.join(os.getcwd(), "images")
 Bootstrap(app)
 
 conn = pymysql.connect(
@@ -42,6 +42,7 @@ def loginAuth():
     # password = request.form['password']
     password = request.form['password'] + SALT
     hashedPassword = hashlib.sha256(password.encode('utf-8')).hexdigest()
+    print(hashedPassword)
 
     cursor = conn.cursor()
     query = "SELECT * FROM person WHERE username = %s and password = %s"
@@ -96,9 +97,10 @@ def home():
     try:
         with conn.cursor() as cursor:
             # query = "SELECT DISTINCT pid, postingdate, filepath, allfollowers, caption, poster FROM person JOIN follow ON (person.username = follow.follower) JOIN photo ON (follow.followee = photo.poster) WHERE (follow.follower = %s AND follow.followstatus = 1) OR poster = %s ORDER BY postingdate DESC"
-            query = "SELECT pid, postingdate, filepath, allfollowers, caption, poster FROM person JOIN follow ON (person.username = follow.follower) JOIN photo ON (follow.followee = photo.poster) WHERE follow.follower = %s AND followstatus = 1 AND allfollowers = 1 UNION SELECT pid, postingdate, filepath, allfollowers, caption, poster FROM photo WHERE poster = %s UNION SELECT pid, postingdate, filepath, allfollowers, caption, poster FROM person JOIN belongto ON (person.username = belongto.username) JOIN sharedwith ON (belongto.groupname = sharedwith.groupname) NATURAL JOIN photo WHERE person.username = %s ORDER BY postingdate DESC"
+            query = "SELECT pid, postingdate, filepath, allfollowers, caption, poster FROM person JOIN follow ON (person.username = follow.follower) JOIN photo ON (follow.followee = photo.poster) WHERE follow.follower = %s AND followstatus = 1 AND allfollowers = 1 UNION SELECT pid, postingdate, filepath, allfollowers, caption, poster FROM photo WHERE poster = %s UNION SELECT pid, postingdate, filepath, allfollowers, caption, poster FROM person JOIN belongto ON (person.username = belongto.username) JOIN sharedwith ON (belongto.groupname = sharedwith.groupname) AND (belongto.groupcreator = sharedwith.groupcreator) NATURAL JOIN photo WHERE person.username = %s ORDER BY postingdate DESC"
             cursor.execute(query, (user, user, user))
             posts = cursor.fetchall()
+            print(posts)
 
         with conn.cursor() as cursor:
             query = "SELECT * FROM follow WHERE followstatus = 0 AND followee = %s"
@@ -201,10 +203,12 @@ def uploadFile():
                 # Photo name should have ID
                 filename = secure_filename(img.filename)
                 # filepath = os.path.join(app.instance_path, 'imgFiles', filename)
-                filepath = "static/img/" + pID + '-' + filename
+                filepath = "static/images/" + pID + '-' + filename
+                dbFilepath = pID + '-' + filename
+
                 # img.save(os.path.join(app.instance_path, 'imgFiles', filename))
                 img.save(filepath)
-                insertPhoto(user, postingDate, filepath, allFollowers, caption)
+                insertPhoto(user, postingDate, dbFilepath, allFollowers, caption)
 
                 session.pop('postingDate')
                 # if (friendGroup != "default"):
@@ -346,7 +350,7 @@ def manageInfo(pID):
             cursor.execute(query, (pID))
             photo = cursor.fetchone()
             session['pID'] = pID
-            # print("\n", photo, "\n")
+            # print("\n PHOTO INFO", photo, "\n")
 
         # Get current tags for photo
         with conn.cursor() as cursor:
@@ -360,7 +364,7 @@ def manageInfo(pID):
         with conn.cursor() as cursor:
             pID = session['pID']
             pendTagMssg = None
-            query = "SELECT * FROM tag WHERE pid = %s AND username = %s AND tagstatus = 0"
+            query = "SELECT * FROM tag WHERE pid = %s AND username = %s AND tagstatus = 0" # Pending tag for user
             cursor.execute(query, (pID, user))
             pendTag = cursor.fetchone()
             if (pendTag):

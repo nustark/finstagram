@@ -85,7 +85,7 @@ select *
 from person join follow on (person.username = follow.follower) join photo on (follow.followee = photo.poster)
 where person.username = 'geohot';
 
--- most recent correct query w/o friendgroup shared
+-- UNION pt 1+2most recent correct query w/o friendgroup shared
 SELECT pid, postingdate, filepath, allfollowers, caption, poster
 FROM person JOIN follow ON (person.username = follow.follower) JOIN photo ON (follow.followee = photo.poster)
 WHERE follow.follower = 'jnd' AND followstatus = 1 AND allfollowers = 1
@@ -98,21 +98,26 @@ ORDER BY postingdate DESC;
 -- most recent correct query w/ friendgroup shared
 SELECT pid, postingdate, filepath, allfollowers, caption, poster
 FROM person JOIN follow ON (person.username = follow.follower) JOIN photo ON (follow.followee = photo.poster)
-WHERE follow.follower = 'geohot' AND followstatus = 1 AND allfollowers = 1
+WHERE follow.follower = 'D' AND followstatus = 1 AND allfollowers = 1
 UNION
 SELECT pid, postingdate, filepath, allfollowers, caption, poster
 FROM photo
-WHERE poster = 'geohot'
+WHERE poster = 'D'
 UNION
 SELECT pid, postingdate, filepath, allfollowers, caption, poster
 FROM person JOIN belongto ON (person.username = belongto.username) JOIN sharedwith ON (belongto.groupname = sharedwith.groupname) NATURAL JOIN photo 
-WHERE person.username = 'geohot'
+WHERE person.username = 'D'
 ORDER BY postingdate DESC;
 
--- photos sharedwith friendgroups user belongs in
+-- (INCORRECT pt 3) photos sharedwith friendgroups user belongs in (incorrect as of test data, A should not be able to see 3 since 3 was shared with a different group named best friends
 SELECT pid, postingdate, filepath, allfollowers, caption, poster
 FROM person JOIN belongto ON (person.username = belongto.username) JOIN sharedwith ON (belongto.groupname = sharedwith.groupname) NATURAL JOIN photo 
-WHERE person.username = 'jnd';
+WHERE person.username = 'A';
+
+--  (correct) UNION PT 3 photos sharedwith friendgroups user belongs in
+SELECT *
+FROM person JOIN belongto ON (person.username = belongto.username) JOIN sharedwith ON (belongto.groupname = sharedwith.groupname) AND (belongto.groupcreator = sharedwith.groupcreator) NATURAL JOIN photo 
+WHERE person.username = 'A';
     
 SELECT * FROM photo JOIN person ON (photo.poster = person.username) WHERE pid = 34;
 SELECT * FROM tag JOIN person ON (tag.username = person.username) WHERE tag.pid = 34 AND tagstatus = 1;
@@ -121,7 +126,7 @@ SELECT * FROM tag WHERE pid = 34 AND username = 'thrmn' AND tagstatus = 0;
 -- see if given user can see a given photo, change follow.followerS and pIDs
 SELECT pid, postingdate, filepath, allfollowers, caption, poster
 FROM person JOIN follow ON (person.username = follow.follower) JOIN photo ON (follow.followee = photo.poster)
-WHERE follow.follower = 'jhnsmth' AND followstatus = 1 AND allfollowers = 1 AND pID = 41
+WHERE follow.follower = 'jnhsmth' AND followstatus = 1 AND allfollowers = 1 AND pID = 41
 UNION
 SELECT pid, postingdate, filepath, allfollowers, caption, poster
 FROM person JOIN belongto ON (person.username = belongto.username) JOIN sharedwith ON (belongto.groupname = sharedwith.groupname) NATURAL JOIN photo 
@@ -138,3 +143,11 @@ select * from sharedwith;
 select * from reactto order by reactiontime asc;
 select * from follow;
 select * from tag;
+
+
+insert into belongto (username, groupname, groupcreator) values ('testuser', 'Administrators', 'secureadmin');
+delete from friendgroup where groupname = '206' and groupcreator = 'thrmn';
+update person set password = '0bce500e4b03f8a68e722105001eda09a1bcdf8dddbfd243068b9d453c8ae6b8' where username = 'geohot';
+
+
+delete from person where username = 'thrmn';
