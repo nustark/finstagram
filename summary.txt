@@ -1,0 +1,5 @@
+1) https://github.com/nustark/finstagram
+
+2) Worked alone
+
+3) Python/Flask, I did the mandatory 5 features as well as #6 - tagging (which was suppose to qualify as the extra 2)
